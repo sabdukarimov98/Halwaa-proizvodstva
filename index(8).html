@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HALWAA · Система цеха</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap&subset=cyrillic,cyrillic-ext,latin" rel="stylesheet">
+<style>
+:root{
+  --cream:#f6f1e7; --cream2:#efe7d6; --ink:#22301f; --ink2:#3c4d36;
+  --green:#1f3d2b; --green2:#2e5a3e; --gold:#b58a2e; --gold2:#d8b25a;
+  --line:#ddd2bb; --card:#fffdf8; --bad:#9c2b2b; --badbg:#f7dcd6; --ok:#2e6b3e;
+  --shadow:0 6px 22px rgba(40,55,35,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:
+  radial-gradient(1200px 600px at 90% -10%, #efe9d8 0%, transparent 60%),
+  var(--cream);color:var(--ink);min-height:100vh}
+.app{display:flex;min-height:100vh}
+/* sidebar */
+.side{width:248px;flex:0 0 248px;background:linear-gradient(180deg,var(--green) 0%,#16291d 100%);
+  color:#f3ecdd;padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;align-items:center;gap:11px;padding:6px 8px 18px}
+.logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--gold2),var(--gold));
+  display:grid;place-items:center;font-family:'Playfair Display',serif;font-weight:700;color:#2a2110;font-size:22px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.brand b{font-family:'Playfair Display',serif;font-size:20px;letter-spacing:.3px;display:block;line-height:1}
+.brand span{font-size:11px;color:#c9bfa6;letter-spacing:2px;text-transform:uppercase}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:10px;color:#d9d0bd;
+  text-decoration:none;font-weight:600;font-size:14.5px;cursor:pointer;transition:.15s;border:1px solid transparent}
+.nav a .ic{width:20px;text-align:center;opacity:.9}
+.nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav a.active{background:linear-gradient(90deg,rgba(216,178,90,.22),rgba(216,178,90,.05));
+  color:#fff;border-color:rgba(216,178,90,.35)}
+.side .foot{margin-top:auto;font-size:11px;color:#9c947f;padding:10px 8px;line-height:1.6}
+/* main */
+.main{flex:1;min-width:0;padding:30px 38px 70px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap}
+.head h1{font-family:'Playfair Display',serif;font-weight:600;font-size:32px;color:var(--green);letter-spacing:.2px}
+.head p{color:var(--ink2);font-size:13.5px;margin-top:3px}
+.btn{font-family:inherit;font-weight:700;font-size:13.5px;border:none;cursor:pointer;border-radius:10px;
+  padding:10px 16px;transition:.15s;display:inline-flex;align-items:center;gap:7px}
+.btn.p{background:var(--green);color:#f3ecdd}.btn.p:hover{background:var(--green2)}
+.btn.g{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#2a2110}.btn.g:hover{filter:brightness(1.05)}
+.btn.o{background:transparent;border:1.5px solid var(--line);color:var(--ink2)}.btn.o:hover{border-color:var(--gold);color:var(--green)}
+.btn.sm{padding:6px 11px;font-size:12px;border-radius:8px}
+/* cards & tables */
+.grid{display:grid;gap:18px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(216,178,90,.18),transparent 70%)}
+.kpi .lab{font-size:12px;text-transform:uppercase;letter-spacing:1.3px;color:var(--ink2);font-weight:700}
+.kpi .val{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-top:8px;color:var(--green)}
+.kpi .val.neg{color:var(--bad)}
+.kpi .sub{font-size:12px;color:#8a8470;margin-top:3px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:22px}
+.panel .ph{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fffdf8,#f7f1e4)}
+.panel .ph h3{font-family:'Playfair Display',serif;font-size:18px;color:var(--green);font-weight:600}
+.panel .pb{padding:6px 8px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#7c7560;font-weight:700;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid #efe7d4;color:var(--ink)}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#faf6ec}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.tag.bad{background:var(--badbg);color:var(--bad)}.tag.ok{background:#dcefdf;color:var(--ok)}.tag.warn{background:#f6e7c8;color:#8a5a12}
+.muted{color:#9b9580}
+.empty{padding:34px;text-align:center;color:#9b9580;font-size:13.5px}
+.row-act{display:flex;gap:6px;justify-content:flex-end}
+.lnk{background:none;border:none;cursor:pointer;font-weight:700;font-size:12px;color:var(--ink2)}
+.lnk:hover{color:var(--gold)}.lnk.del:hover{color:var(--bad)}
+/* form */
+.formrow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;padding:14px 14px 16px}
+.f{display:flex;flex-direction:column;gap:4px}
+.f label{font-size:11px;font-weight:700;color:#7c7560;text-transform:uppercase;letter-spacing:.5px}
+.f input,.f select{font-family:inherit;font-size:13.5px;padding:9px 11px;border:1.5px solid var(--line);border-radius:9px;background:#fffef9;color:var(--ink);min-width:130px}
+.f input:focus,.f select:focus{outline:none;border-color:var(--gold)}
+.f.sm input{min-width:90px}.f.xs input{min-width:70px}
+/* recipe / production cards */
+.pcard{border:1px solid var(--line);border-radius:14px;margin:12px 14px;overflow:hidden;background:#fffdf8}
+.pcard .pch{background:linear-gradient(90deg,var(--green),#23472f);color:#f3ecdd;padding:11px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pcard .pch b{font-family:'Playfair Display',serif;font-size:16px}
+.pcard .pcb{padding:6px 4px}
+.mini{font-size:12.5px}
+.foot-line{display:flex;justify-content:space-between;padding:7px 16px;font-size:13.5px;border-top:1px dashed #e4dcc7}
+.foot-line.big{font-weight:800;color:var(--green);background:#f4efe2}
+.foot-line .v{font-variant-numeric:tabular-nums;font-weight:700}
+.hide{display:none}
+@media(max-width:880px){
+  .app{flex-direction:column}.side{width:100%;height:auto;position:static;flex-direction:row;flex-wrap:wrap;align-items:center}
+  .brand{padding:6px}.nav{display:flex;flex-wrap:wrap;gap:4px}.side .foot{display:none}.main{padding:20px 16px 60px}
+  .head h1{font-size:25px}
+}
+.pbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:9px 14px;margin-bottom:20px;box-shadow:var(--shadow)}
+.pbar-l{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7c7560}
+.chip{font-family:inherit;font-size:12.5px;font-weight:700;border:1.5px solid var(--line);background:#fffef9;color:var(--ink2);border-radius:999px;padding:5px 13px;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--gold)}
+.chip.on{background:var(--green);color:#f3ecdd;border-color:var(--green)}
+.pbar input[type=date]{font-family:inherit;font-size:12.5px;padding:6px 9px;border:1.5px solid var(--line);border-radius:8px;background:#fffef9}
+.pbar-cur{margin-left:auto;font-size:12.5px;color:#8a8470;font-weight:600}
+.gate{position:fixed;inset:0;z-index:200;background:linear-gradient(180deg,var(--green),#16291d);display:flex;align-items:center;justify-content:center;padding:20px}
+.gate.hide{display:none}
+.gatebox{background:var(--card);border-radius:18px;padding:34px 30px;width:300px;max-width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.gatebox h2{font-family:'Playfair Display',serif;color:var(--green);font-size:21px;margin-bottom:4px}
+.gatebox p{color:var(--ink2);font-size:13px;margin-bottom:16px}
+.gatebox input{width:100%;text-align:center;font-size:20px;letter-spacing:6px;padding:12px;border:1.5px solid var(--line);border-radius:11px;margin-bottom:12px;font-family:inherit;background:#fffef9}
+.gatebox input:focus{outline:none;border-color:var(--gold)}
+.gatebox .btn{width:100%;justify-content:center}
+.gateerr{color:var(--bad);font-size:13px;font-weight:700;margin-top:10px;min-height:18px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#f3ecdd;
+  padding:12px 20px;border-radius:11px;box-shadow:0 8px 28px rgba(0,0,0,.25);font-weight:600;font-size:14px;z-index:99;opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1;bottom:34px}
+.toast.bad{background:var(--bad)}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="gate" id="gate">
+  <div class="gatebox">
+    <div class="logo" style="margin:0 auto 14px;width:48px;height:48px;font-size:24px">H</div>
+    <h2>HALWAA · Система цеха</h2>
+    <p>Введите код доступа</p>
+    <input id="gatecode" type="password" inputmode="numeric" placeholder="• • • •" autocomplete="off">
+    <button class="btn p" id="gatebtn">Войти</button>
+    <div class="gateerr" id="gateerr"></div>
+  </div>
+</div>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">H</div>
+      <div><b>HALWAA</b><span>Цех · ERP</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a data-tab="dash" class="active"><span class="ic">◆</span> Сводка</a>
+      <a data-tab="tovary"><span class="ic">▣</span> Товары</a>
+      <a data-tab="syrye"><span class="ic">⬡</span> Сырьё и приход</a>
+      <a data-tab="sup"><span class="ic">☖</span> Поставщики</a>
+      <a data-tab="recipes"><span class="ic">❡</span> Рецепты</a>
+      <a data-tab="prod"><span class="ic">⚙</span> Производство</a>
+      <a data-tab="sklad"><span class="ic">▦</span> Склад</a>
+      <a data-tab="ship"><span class="ic">➜</span> Отгрузка</a>
+      <a data-tab="cash"><span class="ic">₴</span> Касса</a>
+    </nav>
+    <div class="foot">
+      <div id="dbstatus">● Локально (браузер)</div>
+      <button class="btn o sm" id="syncBtn" style="margin-top:8px;width:100%;color:#d9d0bd;border-color:rgba(255,255,255,.2)">↻ Синхронизировать</button>
+      <button class="btn o sm" id="lockBtn" style="margin-top:6px;width:100%;color:#d9d0bd;border-color:rgba(255,255,255,.2)">🔒 Выйти</button>
+      <div style="margin-top:10px">HALWAA BARAKA MChJ · удаление по коду</div>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ STORE ============ */
+const DEL_CODE='2020';
+const KEY='halwaa_tseh_v1';
+const fresh=()=>({
+  products:[], materials:[], suppliers:[{name:'ОптТорг',phone:'',materials:[]}], dealers:['Дилер 1'],
+  arrivals:[], recipes:[], productions:[], shipments:[], cash:[]
+});
+let S=fresh();
+/* ===== Supabase (хранение на сервере) ===== */
+const SUPA_URL='https://bnpsevarpdrdktxhvijr.supabase.co';
+const SUPA_KEY=''; /* ← ВСТАВЬ СЮДА anon public ключ: Supabase → Settings → API → Project API keys → anon public */
+const ROW='halwaa_tseh';
+let db=null, ONLINE=false, saveTimer=null;
+
+function migrate(){ S.suppliers=(S.suppliers||[]).map(x=>typeof x==='string'?{name:x,phone:'',materials:[]}:Object.assign({phone:'',materials:[]},x)); }
+function loadLocal(){ try{const r=localStorage.getItem(KEY); if(r)S=Object.assign(fresh(),JSON.parse(r));}catch(e){} }
+function saveLocal(){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} }
+function load(){ loadLocal(); }
+function save(){ saveLocal(); if(ONLINE&&db){clearTimeout(saveTimer);saveTimer=setTimeout(pushDB,400);} }
+async function pushDB(){ try{const{error}=await db.from('app_state').upsert({id:ROW,data:S,updated_at:new Date().toISOString()}); if(error)throw error; setStatus(true);}catch(e){setStatus(false);} }
+async function initDB(){
+  if(!SUPA_KEY){ setStatus(null); return; }
+  if(!window.supabase){ setStatus(false); return; }
+  try{
+    db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+    const {data,error}=await db.from('app_state').select('data').eq('id',ROW).maybeSingle();
+    if(error)throw error;
+    if(data&&data.data&&Object.keys(data.data).length){ S=Object.assign(fresh(),data.data); migrate(); }
+    else { await pushDB(); }
+    ONLINE=true; setStatus(true); render();
+  }catch(e){ ONLINE=false; setStatus(false); }
+}
+async function syncNow(){ if(!db)return toast('Supabase не подключён (нет ключа)',true);
+  try{const{data,error}=await db.from('app_state').select('data').eq('id',ROW).maybeSingle(); if(error)throw error;
+    if(data&&data.data){S=Object.assign(fresh(),data.data);migrate();render();} setStatus(true);toast('Синхронизировано с сервером');}
+  catch(e){setStatus(false);toast('Ошибка связи с сервером',true);} }
+function setStatus(s){ const el=document.getElementById('dbstatus'); if(!el)return;
+  if(s===null){el.innerHTML='● Локально (браузер)';el.style.color='#c9bfa6';}
+  else if(s){el.innerHTML='● Supabase — онлайн';el.style.color='#7ed99a';}
+  else{el.innerHTML='● Нет связи (локально)';el.style.color='#e0a86b';} }
+function seed(){
+  S=fresh();
+  S.suppliers=[{name:'ОптТорг',phone:'+998 90 000-00-00',materials:['Мука','Сахар','Маргарин']}];
+  S.materials=[{name:'Мука',unit:'кг',supplier:'ОптТорг',min:20},{name:'Сахар',unit:'кг',supplier:'ОптТорг',min:15},{name:'Маргарин',unit:'кг',supplier:'ОптТорг',min:10}];
+  S.products=[{name:'Трубочки',unit:'шт',min:50,pay:200},{name:'Пряники',unit:'шт',min:30,pay:150}];
+  S.arrivals=[{date:'2026-01-05',supplier:'ОптТорг',material:'Мука',qty:100,price:5000},
+    {date:'2026-01-05',supplier:'ОптТорг',material:'Сахар',qty:50,price:9000},
+    {date:'2026-01-05',supplier:'ОптТорг',material:'Маргарин',qty:30,price:22000}];
+  S.recipes=[{product:'Трубочки',batch:300,items:[{material:'Мука',qty:30},{material:'Сахар',qty:9},{material:'Маргарин',qty:6}]}];
+  S.productions=[{date:'2026-01-06',product:'Трубочки',batches:1,mats:[{material:'Мука',qty:28},{material:'Сахар',qty:9},{material:'Маргарин',qty:6}],output:280}];
+  S.shipments=[{date:'2026-01-07',dealer:'Дилер 1',product:'Трубочки',qty:120,price:1500,paid:100000}];
+  S.cash=[{date:'2026-01-05',type:'Расход',cat:'Оплата поставщику',amount:1190000,note:'мука/сахар/маргарин'},
+    {date:'2026-01-07',type:'Приход',cat:'Оплата от дилера',amount:100000,note:''}];
+  save(); render();
+}
+/* ============ HELPERS / COMPUTE ============ */
+const sum=(a,f)=>a.reduce((s,x)=>s+(+f(x)||0),0);
+const money=n=>{n=Math.round(+n||0);return n.toLocaleString('ru-RU')+' сум';};
+const qty=n=>{n=+n||0;return (Math.round(n*1000)/1000).toLocaleString('ru-RU');};
+const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);};
+/* ---- период (фильтр по датам, применяется ко всем операциям) ---- */
+let PERIOD={from:'',to:''};
+function loadPeriod(){try{const r=localStorage.getItem(KEY+'_period');if(r)PERIOD=JSON.parse(r);}catch(e){}}
+function savePeriod(){try{localStorage.setItem(KEY+'_period',JSON.stringify(PERIOD));}catch(e){}}
+function inP(d){if(!PERIOD.from&&!PERIOD.to)return true;if(!d)return false;if(PERIOD.from&&d<PERIOD.from)return false;if(PERIOD.to&&d>PERIOD.to)return false;return true;}
+const fAr=()=>S.arrivals.filter(x=>inP(x.date));
+const fPr=()=>S.productions.filter(x=>inP(x.date));
+const fSh=()=>S.shipments.filter(x=>inP(x.date));
+const fCa=()=>S.cash.filter(x=>inP(x.date));
+function setPreset(p){const t=new Date();const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  if(p==='all')PERIOD={from:'',to:''};
+  else if(p==='today')PERIOD={from:iso(t),to:iso(t)};
+  else if(p==='month')PERIOD={from:iso(new Date(t.getFullYear(),t.getMonth(),1)),to:iso(t)};
+  else if(p==='year')PERIOD={from:iso(new Date(t.getFullYear(),0,1)),to:iso(t)};
+  savePeriod();render();}
+
+const byProd=p=>S.recipes.find(r=>r.product===p);
+const matArrived=m=>sum(fAr().filter(a=>a.material===m),a=>a.qty);
+const matConsumed=m=>sum(fPr(),pr=>sum((pr.mats||[]).filter(x=>x.material===m),x=>x.qty));
+const matStock=m=>matArrived(m)-matConsumed(m);
+const matAvg=m=>{const a=fAr().filter(x=>x.material===m);const q=sum(a,x=>x.qty);return q?sum(a,x=>x.qty*x.price)/q:0;};
+const matUnit=m=>{const x=S.materials.find(t=>t.name===m);return x?x.unit:'';};
+function normPerUnit(prod,mat){const r=byProd(prod);if(!r||!r.batch)return 0;const it=(r.items||[]).find(i=>i.material===mat);return it?it.qty/r.batch:0;}
+function prodMatCost(prod){const r=byProd(prod);if(!r)return 0;return sum(r.items||[],i=>(i.qty/(r.batch||1))*matAvg(i.material));}
+const payOf=p=>{const x=S.products.find(t=>t.name===p);return x?(+x.pay||0):0;};
+const prodCost=p=>prodMatCost(p)+payOf(p);
+const produced=p=>sum(fPr().filter(x=>x.product===p),x=>x.output);
+const shipped=p=>sum(fSh().filter(x=>x.product===p),x=>x.qty);
+const prodStock=p=>produced(p)-shipped(p);
+const laborOwed=()=>sum(fPr(),x=>payOf(x.product)*(+x.output||0))-sum(fCa().filter(c=>/цех|зарплат/i.test(c.cat)),c=>c.amount);
+const CASH_CATS={'Расход':['Зарплата цеху','Оплата поставщику'],'Приход':['Оплата от дилера']};
+const supplierDebt=()=>sum(fAr(),a=>a.qty*a.price)-sum(fCa().filter(c=>/поставщик/i.test(c.cat)),c=>c.amount);
+const supNames=()=>S.suppliers.map(s=>s.name);
+const supMaterials=n=>{const s=S.suppliers.find(x=>x.name===n);return s&&s.materials&&s.materials.length?s.materials:S.materials.map(m=>m.name);};
+const supplierDebtOf=n=>sum(fAr().filter(a=>a.supplier===n),a=>a.qty*a.price)-sum(fCa().filter(c=>/поставщик/i.test(c.cat)&&c.supplier===n),c=>c.amount);
+const dealerNames=()=>[...new Set([...(S.dealers||[]),...S.shipments.map(s=>s.dealer).filter(Boolean)])];
+const dealerDebt=()=>sum(fSh(),s=>s.qty*s.price-(+s.paid||0))-sum(fCa().filter(c=>/дилер/i.test(c.cat)),c=>c.amount);
+const dealerDebtOf=n=>sum(fSh().filter(s=>s.dealer===n),s=>s.qty*s.price-(+s.paid||0))-sum(fCa().filter(c=>/дилер/i.test(c.cat)&&c.dealer===n),c=>c.amount);
+const cashBal=()=>sum(fCa().filter(c=>c.type==='Приход'),c=>c.amount)-sum(fCa().filter(c=>c.type==='Расход'),c=>c.amount);
+const planOutput=pr=>{const r=byProd(pr.product);return r?(r.batch||0)*(+pr.batches||0):0;};
+
+/* ---- Excel-выгрузка (SheetJS) ---- */
+function xlsx(filename,sheets){
+  if(typeof XLSX==='undefined'){toast('Excel-библиотека не загрузилась — нужен интернет',true);return;}
+  const wb=XLSX.utils.book_new();
+  sheets.forEach(s=>{const ws=XLSX.utils.json_to_sheet(s.rows.length?s.rows:[{'—':'нет данных за период'}]);XLSX.utils.book_append_sheet(wb,ws,s.name.slice(0,31));});
+  XLSX.writeFile(wb,filename);toast('Excel выгружен');
+}
+const R0=n=>Math.round(+n||0);
+const sheetProducts=()=>({name:'Товары',rows:S.products.map(p=>({Товар:p.name,Ед:p.unit,'Зарплата/шт':R0(p.pay),'Себестоимость/ед':R0(prodCost(p.name)),Остаток:prodStock(p.name),Мин:p.min}))});
+const sheetMaterials=()=>({name:'Сырьё',rows:S.materials.map(m=>({Материал:m.name,Ед:m.unit,Поставщик:m.supplier||'',Остаток:matStock(m.name),'Ср.цена':R0(matAvg(m.name)),Мин:m.min}))});
+const sheetSuppliers=()=>({name:'Поставщики',rows:S.suppliers.map(s=>({Поставщик:s.name,Телефон:s.phone||'',Сырьё:(s.materials||[]).join(', '),Долг:R0(supplierDebtOf(s.name))}))});
+const sheetArrivals=()=>({name:'Приход',rows:fAr().map(a=>({Дата:a.date,Поставщик:a.supplier,Материал:a.material,'Кол-во':a.qty,Цена:R0(a.price),Сумма:R0(a.qty*a.price)}))});
+const sheetProductions=()=>({name:'Производство',rows:fPr().map(pr=>({Дата:pr.date,Товар:pr.product,Партий:pr.batches,'План выход':planOutput(pr),'Факт выход':(+pr.output||0),Отклонение:planOutput(pr)-(+pr.output||0),'К оплате цеху':R0(payOf(pr.product)*(+pr.output||0))}))});
+const sheetSkladT=()=>({name:'Склад товара',rows:S.products.map(p=>({Товар:p.name,Произведено:produced(p.name),Отгружено:shipped(p.name),Остаток:prodStock(p.name)}))});
+const sheetSkladS=()=>({name:'Склад сырья',rows:S.materials.map(m=>({Материал:m.name,Приход:matArrived(m.name),'Расход (факт)':matConsumed(m.name),Остаток:matStock(m.name),Сигнал:matStock(m.name)<(+m.min||0)?'мало':'ок'}))});
+const sheetShip=()=>({name:'Отгрузка',rows:fSh().map(s=>({Дата:s.date,Дилер:s.dealer,Товар:s.product,'Кол-во':s.qty,Цена:R0(s.price),Сумма:R0(s.qty*s.price),Оплачено:R0(s.paid),Долг:R0(s.qty*s.price-(+s.paid||0)),Контроль:prodStock(s.product)<0?'превышен остаток':'ок'}))});
+const sheetCash=()=>({name:'Касса',rows:fCa().map(c=>({Дата:c.date,Тип:c.type,Статья:c.cat,Сумма:R0(c.amount),Комментарий:c.note||''}))});
+function sheetRecipes(){const rows=[];S.recipes.forEach(r=>{(r.items||[]).forEach(it=>rows.push({Товар:r.product,'Выход партии':r.batch,Материал:it.material,'Кол-во/партия':it.qty,'Норма/ед':Math.round(it.qty/(r.batch||1)*1000)/1000,'Стоимость/ед':R0((it.qty/(r.batch||1))*matAvg(it.material))}));rows.push({Товар:r.product,Материал:'ИТОГО себестоимость/ед','Стоимость/ед':R0(prodCost(r.product))});});return{name:'Рецепты',rows};}
+function doExport(key){
+  const per=(PERIOD.from||PERIOD.to)?`_${PERIOD.from||'нач'}_${PERIOD.to||'кон'}`:'';
+  const map={
+    products:()=>['Товары',[sheetProducts()]],
+    materials:()=>['Сырьё',[sheetMaterials()]],
+    syrye:()=>['Сырьё',[sheetMaterials(),sheetArrivals()]],
+    suppliers:()=>['Поставщики',[sheetSuppliers()]],
+    arrivals:()=>['Приход',[sheetArrivals()]],
+    recipes:()=>['Рецепты',[sheetRecipes()]],
+    productions:()=>['Производство',[sheetProductions()]],
+    sklad:()=>['Склад',[sheetSkladT(),sheetSkladS()]],
+    ship:()=>['Отгрузка',[sheetShip()]],
+    cash:()=>['Касса',[sheetCash()]],
+    all:()=>['HALWAA_цех',[{name:'Сводка',rows:[{Показатель:'Остаток в кассе',Сумма:R0(cashBal())},{Показатель:'Долг поставщикам',Сумма:R0(supplierDebt())},{Показатель:'Долг цеху',Сумма:R0(laborOwed())},{Показатель:'Долг дилера',Сумма:R0(dealerDebt())}]},
+      sheetProducts(),sheetMaterials(),sheetSuppliers(),sheetArrivals(),sheetProductions(),sheetSkladT(),sheetSkladS(),sheetShip(),sheetCash()]]
+  };
+  const [nm,sheets]=map[key]();
+  xlsx(`${nm}${per}.xlsx`,sheets);
+}
+
+/* ============ UI UTIL ============ */
+let TAB='dash';
+function toast(msg,bad){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(bad?' bad':'');setTimeout(()=>t.className='toast',2200);}
+function delGuard(fn){const c=prompt('Введите код для удаления:');if(c===null)return;if(c!==DEL_CODE){toast('Неверный код',true);return;}fn();save();render();toast('Удалено');}
+function opt(arr,sel){return arr.map(o=>`<option ${o===sel?'selected':''}>${o}</option>`).join('');}
+function esc(s){return(s==null?'':''+s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ============ RENDER ============ */
+function periodBar(){
+  const cur=(PERIOD.from||PERIOD.to)?`${PERIOD.from||'…'} — ${PERIOD.to||'…'}`:'весь период';
+  const none=!PERIOD.from&&!PERIOD.to;
+  const xkey={dash:'all',tovary:'products',syrye:'syrye',sup:'suppliers',recipes:'recipes',prod:'productions',sklad:'sklad',ship:'ship',cash:'cash'}[TAB];
+  return `<div class="pbar">
+    <span class="pbar-l">Период</span>
+    <button class="chip ${none?'on':''}" data-prs="all">Весь</button>
+    <button class="chip" data-prs="today">Сегодня</button>
+    <button class="chip" data-prs="month">Месяц</button>
+    <button class="chip" data-prs="year">Год</button>
+    <input type="date" id="pf" value="${PERIOD.from}"><span>—</span><input type="date" id="pt" value="${PERIOD.to}">
+    <button class="btn o sm" id="papply">Применить</button>
+    <button class="btn g sm" data-export="${xkey}">⬇ Excel${TAB==='dash'?' (всё)':''}</button>
+    <span class="pbar-cur">${cur}</span>
+  </div>`;
+}
+function render(){
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.tab===TAB));
+  const M=document.getElementById('main');
+  M.innerHTML=periodBar()+({dash:vDash,tovary:vTovary,syrye:vSyrye,sup:vSup,recipes:vRecipes,prod:vProd,sklad:vSklad,ship:vShip,cash:vCash}[TAB])();
+  bind();
+}
+document.getElementById('nav').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;TAB=a.dataset.tab;render();window.scrollTo(0,0);});
+
+/* ---- DASHBOARD ---- */
+function vDash(){
+  const cb=cashBal(),sd=supplierDebt(),lo=laborOwed(),dd=dealerDebt();
+  const lowMat=S.materials.filter(m=>matStock(m.name)<(+m.min||0));
+  const lowProd=S.products.filter(p=>prodStock(p.name)<(+p.min||0));
+  const oversold=S.products.filter(p=>prodStock(p.name)<0);
+  return `<div class="head"><div><h1>Сводка цеха</h1><p>HALWAA BARAKA — производство и оборот</p></div>
+    <button class="btn o sm" id="seedBtn">Загрузить пример</button></div>
+  <div class="grid kpis">
+    ${kpi('Остаток в кассе',money(cb),cb<0)}
+    ${kpi('Долг поставщикам',money(sd),false,'нам выставлено − оплачено')}
+    ${kpi('Долг цеху (за выпуск)',money(lo),false,'начислено − выплачено')}
+    ${kpi('Долг дилера (нам)',money(dd),false,'отгружено − оплачено')}
+  </div>
+  <div class="panel"><div class="ph"><h3>Сигналы склада</h3></div><div class="pb">
+    ${(lowMat.length||lowProd.length||oversold.length)?`<table><tbody>
+      ${oversold.map(p=>`<tr><td><span class="tag bad">Перепродажа</span></td><td>${esc(p.name)}</td><td class="muted">продано больше, чем на складе (остаток ${qty(prodStock(p.name))})</td></tr>`).join('')}
+      ${lowProd.filter(p=>prodStock(p.name)>=0).map(p=>`<tr><td><span class="tag warn">Мало товара</span></td><td>${esc(p.name)}</td><td class="muted">остаток ${qty(prodStock(p.name))} ${esc(p.unit)} (мин. ${qty(p.min)})</td></tr>`).join('')}
+      ${lowMat.map(m=>`<tr><td><span class="tag warn">Мало сырья</span></td><td>${esc(m.name)}</td><td class="muted">остаток ${qty(matStock(m.name))} ${esc(m.unit)} (мин. ${qty(m.min)})</td></tr>`).join('')}
+    </tbody></table>`:`<div class="empty">Всё в норме — критичных остатков нет.</div>`}
+  </div></div>`;
+}
+function kpi(l,v,neg,sub){return `<div class="kpi"><div class="lab">${l}</div><div class="val ${neg?'neg':''}">${v}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`;}
+
+/* ---- ТОВАРЫ ---- */
+function vTovary(){
+  return `<div class="head"><div><h1>Товары</h1><p>Готовая продукция · зарплата за штуку → в себестоимость</p></div></div>
+  <div class="panel"><div class="ph"><h3>Добавить товар</h3></div>
+    <div class="formrow">
+      <div class="f"><label>Товар</label><input id="t_name" placeholder="напр. Трубочки"></div>
+      <div class="f sm"><label>Ед.</label><input id="t_unit" value="шт"></div>
+      <div class="f sm"><label>Мин. запас</label><input id="t_min" type="number" value="0"></div>
+      <div class="f"><label>Зарплата за 1 шт (сум)</label><input id="t_pay" type="number" value="0"></div>
+      <button class="btn p" id="t_add">Добавить</button>
+    </div></div>
+  <div class="panel"><div class="ph"><h3>Список товаров</h3></div><div class="pb">
+    <table><thead><tr><th>Товар</th><th>Ед.</th><th class="num">Зарплата/шт</th><th class="num">Себестоимость/ед</th><th class="num">Остаток</th><th class="num">Мин.</th><th></th></tr></thead>
+    <tbody>${S.products.length?S.products.map((p,i)=>{const st=prodStock(p.name);return `<tr>
+      <td><b>${esc(p.name)}</b></td><td>${esc(p.unit)}</td>
+      <td class="num">${money(p.pay)}</td>
+      <td class="num">${money(prodCost(p.name))}</td>
+      <td class="num ${st<0?'':''}">${st<0?`<span class="tag bad">${qty(st)}</span>`:qty(st)+' '+esc(p.unit)}</td>
+      <td class="num muted">${qty(p.min)}</td>
+      <td><div class="row-act"><button class="lnk" data-edit="t" data-i="${i}">изм.</button><button class="lnk del" data-del="t" data-i="${i}">удал.</button></div></td>
+    </tr>`;}).join(''):`<tr><td colspan="7"><div class="empty">Пока нет товаров.</div></td></tr>`}</tbody></table>
+  </div></div>`;
+}
+
+/* ---- СЫРЬЁ + ПРИХОД ---- */
+function vSyrye(){
+  return `<div class="head"><div><h1>Сырьё и приход</h1><p>Каталог материалов и история закупок на одном экране</p></div></div>
+  <div class="panel"><div class="ph"><h3>Добавить материал</h3></div>
+    <div class="formrow">
+      <div class="f"><label>Материал</label><input id="m_name" placeholder="напр. Мука"></div>
+      <div class="f sm"><label>Ед.</label><input id="m_unit" value="кг"></div>
+      <div class="f"><label>Поставщик</label><select id="m_sup"><option value="">—</option>${opt(supNames())}</select></div>
+      <div class="f sm"><label>Мин. запас</label><input id="m_min" type="number" value="0"></div>
+      <button class="btn p" id="m_add">Добавить</button>
+    </div></div>
+  <div class="panel"><div class="ph"><h3>Каталог сырья</h3></div><div class="pb">
+    <table><thead><tr><th>Материал</th><th>Ед.</th><th>Поставщик</th><th class="num">Остаток</th><th class="num">Ср. цена закупки</th><th class="num">Мин.</th><th></th></tr></thead>
+    <tbody>${S.materials.length?S.materials.map((m,i)=>{const st=matStock(m.name);const low=st<(+m.min||0);return `<tr>
+      <td><b>${esc(m.name)}</b></td><td>${esc(m.unit)}</td><td class="muted">${esc(m.supplier||'')}</td>
+      <td class="num">${low?`<span class="tag warn">${qty(st)}</span>`:qty(st)+' '+esc(m.unit)}</td>
+      <td class="num">${money(matAvg(m.name))}</td><td class="num muted">${qty(m.min)}</td>
+      <td><div class="row-act"><button class="lnk" data-edit="m" data-i="${i}">изм.</button><button class="lnk del" data-del="m" data-i="${i}">удал.</button></div></td>
+    </tr>`;}).join(''):`<tr><td colspan="7"><div class="empty">Пока нет материалов.</div></td></tr>`}</tbody></table>
+  </div></div>
+  <div class="panel"><div class="ph"><h3>Приход сырья</h3></div>
+    <div class="formrow">
+      <div class="f sm"><label>Дата</label><input id="a_date" type="date" value="${today()}"></div>
+      <div class="f"><label>Поставщик</label><select id="a_sup">${opt(supNames())}</select></div>
+      <div class="f"><label>Материал</label><select id="a_mat">${opt(supMaterials(supNames()[0]||''))}</select></div>
+      <div class="f xs"><label>Кол-во</label><input id="a_qty" type="number"></div>
+      <div class="f sm"><label>Цена/ед</label><input id="a_price" type="number"></div>
+      <button class="btn p" id="a_add">Записать приход</button>
+    </div>
+    <div class="pb"><table><thead><tr><th>Дата</th><th>Поставщик</th><th>Материал</th><th class="num">Кол-во</th><th class="num">Цена</th><th class="num">Сумма</th><th></th></tr></thead>
+    <tbody>${(()=>{const rs=S.arrivals.map((a,i)=>({a,i})).filter(o=>inP(o.a.date));return rs.length?rs.map(({a,i})=>`<tr><td>${esc(a.date)}</td><td class="muted">${esc(a.supplier)}</td><td>${esc(a.material)}</td>
+      <td class="num">${qty(a.qty)}</td><td class="num">${money(a.price)}</td><td class="num"><b>${money(a.qty*a.price)}</b></td>
+      <td><div class="row-act"><button class="lnk del" data-del="a" data-i="${i}">удал.</button></div></td></tr>`).join(''):`<tr><td colspan="7"><div class="empty">Приходов за период нет.</div></td></tr>`;})()}</tbody></table></div>
+  </div>`;
+}
+
+/* ---- ПОСТАВЩИКИ ---- */
+function vSup(){
+  const matChips=(sel)=>S.materials.map(m=>`<label style="display:inline-flex;align-items:center;gap:5px;margin:3px 8px 3px 0;font-size:13px"><input type="checkbox" class="sup_m" value="${esc(m.name)}" ${sel&&sel.includes(m.name)?'checked':''}> ${esc(m.name)}</label>`).join('');
+  return `<div class="head"><div><h1>Поставщики</h1><p>Контакты, привязка сырья и долг по каждому поставщику</p></div></div>
+  <div class="panel"><div class="ph"><h3>Добавить поставщика</h3></div>
+    <div class="formrow">
+      <div class="f"><label>Имя / название</label><input id="su_name" placeholder="напр. ОптТорг"></div>
+      <div class="f"><label>Телефон</label><input id="su_phone" placeholder="+998 ..."></div>
+      <button class="btn p" id="su_add">Добавить</button>
+    </div>
+    <div style="padding:0 14px 12px"><label style="font-size:11px;font-weight:700;color:#7c7560;text-transform:uppercase;letter-spacing:.5px">Привязать сырьё</label><div style="margin-top:6px">${S.materials.length?matChips([]):'<span class="muted">Сначала добавьте материалы во вкладке «Сырьё».</span>'}</div></div>
+  </div>
+  <div class="panel"><div class="ph"><h3>Список поставщиков</h3></div><div class="pb">
+    <table><thead><tr><th>Поставщик</th><th>Телефон</th><th>Сырьё</th><th class="num">Долг</th><th></th></tr></thead>
+    <tbody>${S.suppliers.length?S.suppliers.map((s,i)=>{const d=supplierDebtOf(s.name);return `<tr>
+      <td><b>${esc(s.name)}</b></td><td class="muted">${esc(s.phone||'')}</td>
+      <td class="muted">${(s.materials||[]).map(esc).join(', ')||'—'}</td>
+      <td class="num">${d>0?`<b>${money(d)}</b>`:money(d)}</td>
+      <td><div class="row-act"><button class="lnk" data-edit="su" data-i="${i}">изм.</button><button class="lnk del" data-del="su" data-i="${i}">удал.</button></div></td>
+    </tr>`;}).join(''):`<tr><td colspan="5"><div class="empty">Поставщиков пока нет.</div></td></tr>`}</tbody></table>
+  </div></div>`;
+}
+
+/* ---- РЕЦЕПТЫ ---- */
+function vRecipes(){
+  const noRec=S.products.filter(p=>!byProd(p.name));
+  return `<div class="head"><div><h1>Рецепты и себестоимость</h1><p>Норма сырья на партию → себестоимость единицы</p></div></div>
+  <div class="panel"><div class="ph"><h3>Новый / изменить рецепт</h3></div>
+    <div class="formrow">
+      <div class="f"><label>Товар</label><select id="r_prod">${opt(S.products.map(x=>x.name))}</select></div>
+      <div class="f sm"><label>Выход партии (ед.)</label><input id="r_batch" type="number" placeholder="напр. 300"></div>
+      <button class="btn p" id="r_open">Открыть карточку</button>
+    </div></div>
+  ${S.recipes.map((r,ri)=>recipeCard(r,ri)).join('')}
+  ${S.recipes.length?'':'<div class="panel"><div class="empty">Рецептов пока нет. Выбери товар, укажи выход партии и открой карточку.</div></div>'}`;
+}
+function recipeCard(r,ri){
+  const pay=payOf(r.product);
+  const matPerUnit=prodMatCost(r.product);
+  return `<div class="pcard"><div class="pch"><b>${esc(r.product)}</b><span class="mini">Выход партии: ${qty(r.batch)} ед.</span></div>
+  <div class="pcb"><table class="mini"><thead><tr><th>Материал</th><th>Ед.</th><th class="num">Кол-во на партию</th><th class="num">Норма/ед</th><th class="num">Ср.цена</th><th class="num">Стоимость/ед</th><th></th></tr></thead>
+  <tbody>${(r.items||[]).map((it,ii)=>`<tr><td>${esc(it.material)}</td><td class="muted">${esc(matUnit(it.material))}</td><td class="num">${qty(it.qty)}</td>
+    <td class="num">${qty(it.qty/(r.batch||1))}</td><td class="num muted">${money(matAvg(it.material))}</td>
+    <td class="num">${money((it.qty/(r.batch||1))*matAvg(it.material))}</td>
+    <td><button class="lnk del" data-del="ri" data-r="${ri}" data-i="${ii}">×</button></td></tr>`).join('')}
+    <tr><td colspan="7" style="padding:8px 12px">
+      <div class="formrow" style="padding:0">
+        <div class="f"><label>Добавить материал</label><select id="ri_mat_${ri}">${opt(S.materials.map(x=>x.name))}</select></div>
+        <div class="f xs"><label>На партию</label><input id="ri_qty_${ri}" type="number"></div>
+        <button class="btn o sm" data-addri="${ri}">+ строка</button>
+      </div></td></tr>
+  </tbody></table>
+  <div class="foot-line"><span>Сырьё на 1 ед.</span><span class="v">${money(matPerUnit)}</span></div>
+  <div class="foot-line"><span>Зарплата на 1 ед. (из «Товары»)</span><span class="v">${money(pay)}</span></div>
+  <div class="foot-line"><span>Зарплата на партию (план)</span><span class="v">${money(pay*(r.batch||0))}</span></div>
+  <div class="foot-line big"><span>СЕБЕСТОИМОСТЬ 1 ед.</span><span class="v">${money(matPerUnit+pay)}</span></div>
+  <div style="padding:8px 14px;text-align:right"><button class="lnk del" data-del="r" data-i="${ri}">удалить рецепт</button></div>
+  </div></div>`;
+}
+
+/* ---- ПРОИЗВОДСТВО ---- */
+function vProd(){
+  return `<div class="head"><div><h1>Производство</h1><p>Расход сырья по факту, выпуск и контроль отклонений</p></div></div>
+  <div class="panel"><div class="ph"><h3>Новый запуск</h3></div>
+    <div class="formrow">
+      <div class="f sm"><label>Дата</label><input id="p_date" type="date" value="${today()}"></div>
+      <div class="f"><label>Товар</label><select id="p_prod">${opt(S.products.map(x=>x.name))}</select></div>
+      <div class="f xs"><label>Партий</label><input id="p_batches" type="number" value="1"></div>
+      <button class="btn p" id="p_open">Создать карточку</button>
+    </div></div>
+  ${S.productions.map((pr,pi)=>({pr,pi})).filter(o=>inP(o.pr.date)).map(({pr,pi})=>prodCard(pr,pi)).join('')}
+  ${S.productions.filter(p=>inP(p.date)).length?'':'<div class="panel"><div class="empty">Запусков за период нет.</div></div>'}`;
+}
+function prodCard(pr,pi){
+  const plan=planOutput(pr);
+  const dev=plan-(+pr.output||0);
+  let status='<span class="tag ok">✓ ОК</span>';
+  if(pr.output==null||pr.output==='') status='<span class="tag warn">нет выпуска</span>';
+  else if(pr.output<plan) status=`<span class="tag bad">⚠ недовыпуск ${qty(dev)}</span>`;
+  else if(pr.output>plan) status=`<span class="tag warn">⚠ перевыпуск ${qty(-dev)}</span>`;
+  const pay=payOf(pr.product);
+  const inpCss='width:90px;text-align:right;padding:4px 7px;border:1.5px solid var(--line);border-radius:7px;font-family:inherit;color:#0000ff';
+  return `<div class="pcard"><div class="pch"><b>${esc(pr.product)}</b>
+    <span class="mini">${esc(pr.date||'')} · партий: ${qty(pr.batches)} · план выход: ${qty(plan)} ед. ${pr.done?'· <span style="color:#d8b25a">✓ проведено</span>':''}</span></div>
+  <div class="pcb"><table class="mini"><thead><tr><th>Материал (по рецепту)</th><th>Ед.</th><th class="num">Факт</th><th class="num">Норма всего</th><th class="num">Отклонение</th></tr></thead>
+  <tbody>${(pr.mats&&pr.mats.length)?(pr.mats).map((mm,mi)=>{const normAll=normPerUnit(pr.product,mm.material)*plan;const d=normAll-(+mm.qty||0);return `<tr>
+    <td>${esc(mm.material)}</td><td class="muted">${esc(matUnit(mm.material))}</td>
+    <td class="num"><input type="number" value="${mm.qty??''}" data-pmq="${pi}_${mi}" style="${inpCss}"></td>
+    <td class="num muted">${qty(normAll)}</td>
+    <td class="num">${(mm.qty===''||mm.qty==null)?'':(d<0?`<span class="tag bad">${qty(d)}</span>`:qty(d))}</td></tr>`;}).join('')
+    :`<tr><td colspan="5" class="muted" style="padding:12px">Нет рецепта для этого товара — сначала заполните рецепт, затем создайте карточку заново.</td></tr>`}
+  </tbody></table>
+  <div class="foot-line"><span>Факт выпуск (ед.)</span><span class="v"><input type="number" value="${pr.output??''}" data-out="${pi}" style="width:110px;text-align:right;padding:5px 8px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;color:#0000ff"></span></div>
+  <div class="foot-line"><span>План / Отклонение</span><span class="v">${qty(plan)} / ${qty(dev)} &nbsp; ${status}</span></div>
+  <div class="foot-line big"><span>К оплате цеху (за выпуск)</span><span class="v">${money(pay*(+pr.output||0))}</span></div>
+  <div style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+    <button class="btn ${pr.done?'o':'g'} sm" data-commit="${pi}">${pr.done?'✓ Проведено':'Провести производство'}</button>
+    <button class="lnk del" data-del="p" data-i="${pi}">удалить запуск</button></div>
+  </div></div>`;
+}
+
+/* ---- СКЛАД ---- */
+function vSklad(){
+  return `<div class="head"><div><h1>Склад</h1><p>Готовый товар и сырьё — расчётные остатки</p></div></div>
+  <div class="panel"><div class="ph"><h3>Готовый товар</h3></div><div class="pb">
+    <table><thead><tr><th>Товар</th><th class="num">Произведено</th><th class="num">Отгружено</th><th class="num">Остаток</th></tr></thead>
+    <tbody>${S.products.length?S.products.map(p=>{const st=prodStock(p.name);return `<tr><td><b>${esc(p.name)}</b></td>
+      <td class="num">${qty(produced(p.name))}</td><td class="num">${qty(shipped(p.name))}</td>
+      <td class="num">${st<0?`<span class="tag bad">${qty(st)}</span>`:'<b>'+qty(st)+'</b> '+esc(p.unit)}</td></tr>`;}).join(''):`<tr><td colspan="4"><div class="empty">Нет товаров.</div></td></tr>`}</tbody></table>
+  </div></div>
+  <div class="panel"><div class="ph"><h3>Сырьё</h3></div><div class="pb">
+    <table><thead><tr><th>Материал</th><th class="num">Приход</th><th class="num">Расход (факт)</th><th class="num">Остаток</th><th>Сигнал</th></tr></thead>
+    <tbody>${S.materials.length?S.materials.map(m=>{const st=matStock(m.name);const low=st<(+m.min||0);return `<tr><td><b>${esc(m.name)}</b></td>
+      <td class="num">${qty(matArrived(m.name))}</td><td class="num">${qty(matConsumed(m.name))}</td>
+      <td class="num"><b>${qty(st)}</b> ${esc(m.unit)}</td><td>${low?'<span class="tag warn">мало</span>':'<span class="tag ok">ок</span>'}</td></tr>`;}).join(''):`<tr><td colspan="5"><div class="empty">Нет материалов.</div></td></tr>`}</tbody></table>
+  </div></div>`;
+}
+
+/* ---- ОТГРУЗКА ---- */
+function vShip(){
+  return `<div class="head"><div><h1>Отгрузка дилеру</h1><p>Продажа готового товара с контролем остатка</p></div></div>
+  <div class="panel"><div class="ph"><h3>Новая отгрузка</h3></div>
+    <div class="formrow">
+      <div class="f sm"><label>Дата</label><input id="s_date" type="date" value="${today()}"></div>
+      <div class="f"><label>Дилер</label><input id="s_dealer" placeholder="дилер"></div>
+      <div class="f"><label>Товар</label><select id="s_prod">${opt(S.products.map(x=>x.name))}</select></div>
+      <div class="f xs"><label>Кол-во</label><input id="s_qty" type="number"></div>
+      <div class="f sm"><label>Цена</label><input id="s_price" type="number"></div>
+      <div class="f sm"><label>Оплачено</label><input id="s_paid" type="number" value="0"></div>
+      <button class="btn p" id="s_add">Отгрузить</button>
+    </div></div>
+  <div class="panel"><div class="ph"><h3>Журнал отгрузок</h3></div><div class="pb">
+    <table><thead><tr><th>Дата</th><th>Дилер</th><th>Товар</th><th class="num">Кол-во</th><th class="num">Сумма</th><th class="num">Долг</th><th>Контроль</th><th></th></tr></thead>
+    <tbody>${(()=>{const rs=S.shipments.map((s,i)=>({s,i})).filter(o=>inP(o.s.date));return rs.length?rs.map(({s,i})=>{const st=prodStock(s.product);return `<tr><td>${esc(s.date)}</td><td class="muted">${esc(s.dealer)}</td><td>${esc(s.product)}</td>
+      <td class="num">${qty(s.qty)}</td><td class="num">${money(s.qty*s.price)}</td><td class="num">${money(s.qty*s.price-(+s.paid||0))}</td>
+      <td>${st<0?'<span class="tag bad">⚠ превышен остаток</span>':'<span class="tag ok">ок</span>'}</td>
+      <td><div class="row-act"><button class="lnk del" data-del="s" data-i="${i}">удал.</button></div></td></tr>`;}).join(''):`<tr><td colspan="8"><div class="empty">Отгрузок за период нет.</div></td></tr>`;})()}</tbody></table>
+  </div></div>`;
+}
+
+/* ---- КАССА ---- */
+function vCash(){
+  return `<div class="head"><div><h1>Касса</h1><p>Остаток: <b>${money(cashBal())}</b> &nbsp;·&nbsp; Долг поставщикам: <b>${money(supplierDebt())}</b> &nbsp;·&nbsp; Долг цеху: <b>${money(laborOwed())}</b> &nbsp;·&nbsp; Долг дилера: <b>${money(dealerDebt())}</b></p></div></div>
+  <div class="panel"><div class="ph"><h3>Операция</h3></div>
+    <div class="formrow">
+      <div class="f sm"><label>Дата</label><input id="c_date" type="date" value="${today()}"></div>
+      <div class="f"><label>Тип</label><select id="c_type"><option>Расход</option><option>Приход</option></select></div>
+      <div class="f"><label>Статья</label><select id="c_cat"></select></div>
+      <div class="f hide" id="c_sup_wrap"><label>Поставщик</label><select id="c_sup">${opt(supNames())}</select></div>
+      <div class="f hide" id="c_deal_wrap"><label>Дилер</label><select id="c_deal">${opt(dealerNames())}</select></div>
+      <div class="f sm"><label>Сумма</label><input id="c_amount" type="number"></div>
+      <div class="f"><label>Комментарий</label><input id="c_note"></div>
+      <button class="btn p" id="c_add">Записать</button>
+    </div>
+    <div style="padding:0 16px 12px;font-size:12px;color:#8a8470">Оплата по статье «Оплата поставщику» уменьшает долг поставщикам, «Зарплата цеху» — долг цеху.</div></div>
+  <div class="panel"><div class="ph"><h3>Журнал кассы</h3></div><div class="pb">
+    <table><thead><tr><th>Дата</th><th>Тип</th><th>Статья</th><th class="num">Сумма</th><th>Комментарий</th><th></th></tr></thead>
+    <tbody>${(()=>{const rs=S.cash.map((c,i)=>({c,i})).filter(o=>inP(o.c.date));return rs.length?rs.map(({c,i})=>`<tr><td>${esc(c.date)}</td>
+      <td>${c.type==='Приход'?'<span class="tag ok">приход</span>':'<span class="tag bad">расход</span>'}</td>
+      <td>${esc(c.cat)}</td><td class="num">${money(c.amount)}</td><td class="muted">${esc(c.note||'')}</td>
+      <td><div class="row-act"><button class="lnk del" data-del="c" data-i="${i}">удал.</button></div></td></tr>`).join(''):`<tr><td colspan="6"><div class="empty">Операций за период нет.</div></td></tr>`;})()}</tbody></table>
+  </div></div>`;
+}
+
+/* ============ BIND EVENTS ============ */
+function val(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function dval(id){return val(id)||today();}
+function num(id){return +val(id)||0;}
+function bind(){
+  const $=id=>document.getElementById(id);
+  // период + экспорт
+  document.querySelectorAll('[data-prs]').forEach(b=>b.onclick=()=>setPreset(b.dataset.prs));
+  if($('papply'))$('papply').onclick=()=>{PERIOD={from:val('pf'),to:val('pt')};savePeriod();render();};
+  document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>doExport(b.dataset.export));
+  if($('seedBtn'))$('seedBtn').onclick=()=>{if(confirm('Загрузить демо-данные? Текущие будут заменены.'))seed();};
+  // товары
+  if($('t_add'))$('t_add').onclick=()=>{if(!val('t_name'))return toast('Введите название',true);
+    S.products.push({name:val('t_name'),unit:val('t_unit')||'шт',min:num('t_min'),pay:num('t_pay')});save();render();toast('Товар добавлен');};
+  // материалы
+  if($('m_add'))$('m_add').onclick=()=>{if(!val('m_name'))return toast('Введите название',true);
+    S.materials.push({name:val('m_name'),unit:val('m_unit')||'кг',supplier:val('m_sup'),min:num('m_min')});save();render();toast('Материал добавлен');};
+  // поставщики
+  if($('su_add'))$('su_add').onclick=()=>{if(!val('su_name'))return toast('Введите имя',true);
+    const mats=[...document.querySelectorAll('.sup_m:checked')].map(c=>c.value);
+    S.suppliers.push({name:val('su_name'),phone:val('su_phone'),materials:mats});save();render();toast('Поставщик добавлен');};
+  if($('a_sup'))$('a_sup').onchange=()=>{const m=$('a_mat');if(m)m.innerHTML=opt(supMaterials($('a_sup').value));};
+  // приход
+  if($('a_add'))$('a_add').onclick=()=>{if(!val('a_mat'))return toast('Нет материала',true);
+    S.arrivals.push({date:dval('a_date'),supplier:val('a_sup'),material:val('a_mat'),qty:num('a_qty'),price:num('a_price')});save();render();toast('Приход записан');};
+  // рецепт открыть
+  if($('r_open'))$('r_open').onclick=()=>{const p=val('r_prod');if(!p)return toast('Нет товара',true);
+    let r=byProd(p);if(!r){r={product:p,batch:num('r_batch')||1,items:[]};S.recipes.push(r);}else if(num('r_batch'))r.batch=num('r_batch');save();render();};
+  document.querySelectorAll('[data-addri]').forEach(b=>b.onclick=()=>{const ri=+b.dataset.addri;const mat=val('ri_mat_'+ri),q=num('ri_qty_'+ri);
+    if(!mat||!q)return toast('Материал и кол-во',true);
+    if((S.recipes[ri].items||[]).some(it=>it.material===mat))return toast('Этот материал уже есть в рецепте',true);
+    S.recipes[ri].items.push({material:mat,qty:q});save();render();});
+  // производство открыть — подставляем все материалы из рецепта
+  if($('p_open'))$('p_open').onclick=()=>{const p=val('p_prod');if(!p)return toast('Нет товара',true);
+    const r=byProd(p);const mats=(r&&r.items?r.items:[]).map(it=>({material:it.material,qty:''}));
+    S.productions.push({date:dval('p_date'),product:p,batches:num('p_batches')||1,mats,output:'',done:false});save();render();
+    toast(mats.length?`Карточка создана: ${mats.length} видов сырья из рецепта`:'Карточка создана (рецепт пуст)');};
+  document.querySelectorAll('[data-pmq]').forEach(inp=>inp.onchange=()=>{const[pi,mi]=inp.dataset.pmq.split('_').map(Number);
+    S.productions[pi].mats[mi].qty=inp.value===''?'':(+inp.value||0);save();render();});
+  document.querySelectorAll('[data-out]').forEach(inp=>inp.onchange=()=>{const pi=+inp.dataset.out;S.productions[pi].output=inp.value===''?'':(+inp.value||0);save();render();});
+  document.querySelectorAll('[data-commit]').forEach(b=>b.onclick=()=>{const pi=+b.dataset.commit;const pr=S.productions[pi];
+    if(pr.output===''||pr.output==null)return toast('Сначала впишите факт выпуска',true);
+    if(!confirm(`Провести производство «${pr.product}» — выпуск ${qty(pr.output)} ед.?\nСырьё спишется со склада, начислится оплата цеху.`))return;
+    pr.done=true;save();render();toast('Производство проведено');});
+  // отгрузка
+  if($('s_add'))$('s_add').onclick=()=>{const p=val('s_prod');if(!p)return toast('Нет товара',true);
+    const q=num('s_qty');const stock=prodStock(p);
+    if(q>stock){if(!confirm(`Внимание: на складе только ${qty(stock)} ${p}. Отгрузить ${qty(q)} всё равно?`))return;}
+    S.shipments.push({date:dval('s_date'),dealer:val('s_dealer'),product:p,qty:q,price:num('s_price'),paid:num('s_paid')});save();render();
+    if(q>stock)toast('Отгружено — остаток в минусе!',true);else toast('Отгрузка записана');};
+  // касса
+  if($('c_type')){const fc=()=>{$('c_cat').innerHTML=(CASH_CATS[$('c_type').value]||[]).map(o=>`<option>${o}</option>`).join('');tg();};
+    const tg=()=>{const cat=$('c_cat').value;const ws=$('c_sup_wrap'),wd=$('c_deal_wrap');if(ws)ws.classList.toggle('hide',!/поставщик/i.test(cat));if(wd)wd.classList.toggle('hide',!/дилер/i.test(cat));};
+    $('c_type').onchange=fc;$('c_cat').onchange=tg;fc();}
+  if($('c_add'))$('c_add').onclick=()=>{if(!val('c_cat'))return toast('Выберите статью',true);
+    const amt=num('c_amount');
+    if($('c_type').value==='Расход'&&amt>cashBal()){if(!confirm(`В кассе только ${money(cashBal())}. Списать ${money(amt)} всё равно? Остаток уйдёт в минус.`))return;}
+    const e={date:dval('c_date'),type:val('c_type'),cat:val('c_cat'),amount:amt,note:val('c_note')};
+    if(/поставщик/i.test(e.cat))e.supplier=val('c_sup');
+    if(/дилер/i.test(e.cat))e.dealer=val('c_deal');
+    S.cash.push(e);save();render();toast('Записано');};
+  // edit
+  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editRow(b.dataset.edit,+b.dataset.i));
+  // delete (code-guarded)
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    const t=b.dataset.del,i=+b.dataset.i;
+    delGuard(()=>{
+      if(t==='t')S.products.splice(i,1);
+      else if(t==='m')S.materials.splice(i,1);
+      else if(t==='a')S.arrivals.splice(i,1);
+      else if(t==='r')S.recipes.splice(i,1);
+      else if(t==='ri')S.recipes[+b.dataset.r].items.splice(i,1);
+      else if(t==='p')S.productions.splice(i,1);
+      else if(t==='pm')S.productions[+b.dataset.p].mats.splice(i,1);
+      else if(t==='s')S.shipments.splice(i,1);
+      else if(t==='c')S.cash.splice(i,1);
+      else if(t==='su')S.suppliers.splice(i,1);
+    });
+  });
+}
+function editRow(t,i){
+  if(t==='t'){const p=S.products[i];const name=prompt('Товар:',p.name);if(name===null)return;
+    const unit=prompt('Ед.:',p.unit)??p.unit;const min=prompt('Мин. запас:',p.min)??p.min;const pay=prompt('Зарплата за 1 шт (сум):',p.pay)??p.pay;
+    Object.assign(p,{name:name.trim()||p.name,unit:unit.trim()||p.unit,min:+min||0,pay:+pay||0});save();render();toast('Изменено');}
+  else if(t==='m'){const m=S.materials[i];const name=prompt('Материал:',m.name);if(name===null)return;
+    const unit=prompt('Ед.:',m.unit)??m.unit;const sup=prompt('Поставщик:',m.supplier||'')??m.supplier;const min=prompt('Мин. запас:',m.min)??m.min;
+    Object.assign(m,{name:name.trim()||m.name,unit:unit.trim()||m.unit,supplier:sup.trim(),min:+min||0});save();render();toast('Изменено');}
+  else if(t==='su'){const s=S.suppliers[i];const name=prompt('Поставщик:',s.name);if(name===null)return;
+    const phone=prompt('Телефон:',s.phone||'')??s.phone;
+    const mats=prompt('Сырьё через запятую:', (s.materials||[]).join(', '));
+    Object.assign(s,{name:name.trim()||s.name,phone:phone.trim(),materials:mats===null?s.materials:mats.split(',').map(x=>x.trim()).filter(Boolean)});save();render();toast('Изменено');}
+}
+/* ============ INIT ============ */
+load();
+migrate();
+loadPeriod();
+if(!S.products.length&&!S.materials.length&&!S.arrivals.length){seed();}else{render();}
+initDB();
+{const sb=document.getElementById('syncBtn');if(sb)sb.onclick=syncNow;}
+/* ===== Код доступа 2020 ===== */
+const AUTH_CODE='2020';
+function showGate(){const g=document.getElementById('gate');if(!g)return;
+  if(sessionStorage.getItem('halwaa_auth')==='1'){g.classList.add('hide');return;}
+  g.classList.remove('hide');
+  const inp=document.getElementById('gatecode'),err=document.getElementById('gateerr');
+  const sub=()=>{if(inp.value.trim()===AUTH_CODE){sessionStorage.setItem('halwaa_auth','1');g.classList.add('hide');}
+    else{err.textContent='Неверный код';inp.value='';inp.focus();}};
+  document.getElementById('gatebtn').onclick=sub;
+  inp.onkeydown=e=>{if(e.key==='Enter')sub();};
+  setTimeout(()=>inp.focus(),100);
+}
+{const lb=document.getElementById('lockBtn');if(lb)lb.onclick=()=>{sessionStorage.removeItem('halwaa_auth');showGate();};}
+showGate();
+</script>
+</body>
+</html>
